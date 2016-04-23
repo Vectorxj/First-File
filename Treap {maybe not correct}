@@ -36,13 +36,15 @@ namespace Treap{
 	inline int remove(node* &o,int x){
 		int d=o->cmp(x);
 		if(d==-1){
-			if(o->l==NULL)o=o->r;
-			else if(o->r==NULL)o=o->l;
+			node* u=o;
+			if(o->l==NULL)o=o->r,delete u;
+			else if(o->r==NULL)o=o->l,delete u;
 			else {
 				int d_=(o->l->pri>o->r->pri)?1:0;
 				rotate(o,d_);remove(o->ch[d_],x);
 			}
 		}else remove(o->ch[d],x);
+		if(o!=NULL)o->maintain();
 	}
 	inline node* kth(node* o,int k){
 		if(o==NULL||k<=0||k>o->s)return NULL;
@@ -81,13 +83,4 @@ namespace Treap{
 	}
 	#undef l
 	#undef r
-}
-using namespace Treap;
-
-int main(){
-	insert(root,2);
-	insert(root,3);
-	insert(root,1);
-	cout<<rank(root,3);
-	return 0;
 }
