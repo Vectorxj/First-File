@@ -1,0 +1,93 @@
+#include<cstdio>
+#include<cstdlib>
+#include<iostream>
+#include<cstring>
+using namespace std;
+
+namespace Treap{
+	#define l ch[0]
+	#define r ch[1]
+	struct node{
+		node* ch[2];
+		int key,pri,s;
+		int cmp(int x){
+			if(key==x)return -1;
+			return key<x;
+		}
+		void maintain(){
+			s=1;
+			if(l!=NULL)s+=l->s;
+			if(r!=NULL)s+=r->s;
+		}
+	}*root;
+	inline void rotate(node* &o,int d){ //d==0 left_rotate
+		node* k=o->ch[d^1];o->ch[d^1]=k->ch[d];k->ch[d]=o;o=k;
+		o->maintain();k->maintain();
+	}
+	inline int insert(node* &o,int x){
+		if(o==NULL){o=new node();o->l=o->r=NULL;o->key=x;o->pri=rand();o->s=1;return 1;}
+		int d=(x<o->key?0:1);
+		if(d==-1)return -1;
+		int res=insert(o->ch[d],x);
+		if(o->ch[d]->pri>o->pri)rotate(o,d^1);
+		o->maintain();
+		return res;
+	}
+	inline int remove(node* &o,int x){
+		int d=o->cmp(x);
+		if(d==-1){
+			if(o->l==NULL)o=o->r;
+			else if(o->r==NULL)o=o->l;
+			else {
+				int d_=(o->l->pri>o->r->pri)?1:0;
+				rotate(o,d_);remove(o->ch[d_],x);
+			}
+		}else remove(o->ch[d],x);
+	}
+	inline node* kth(node* o,int k){
+		if(o==NULL||k<=0||k>o->s)return NULL;
+		int size=(o->l==NULL)?0:o->l->s;
+		if(k==size+1)return o;
+		if(k>size)return kth(o->r,k-size-1);
+		else return kth(o->l,k);
+	}
+	inline int rank(node* o,int x){
+		if(o==NULL)return -1;
+		int size=(o->l==NULL)?0:o->l->s,d=o->cmp(x);
+		if(d==-1)return size+1;
+		if(d){
+			int res=rank(o->r,x);
+			return res==-1?-1:size+1+res;
+		}
+		else{
+			return rank(o->l,x);
+		}
+	}
+	inline node* maximum(node* o){
+		for(;o->r!=NULL;o=o->r);
+		return o;
+	}
+	inline node* minimum(node* o){
+		for(;o->l!=NULL;o=o->l);
+		return o;
+	}
+	inline node* find(node* o,int x){
+		while(1){
+			if(o==NULL)return NULL;
+			int d=o->cmp(x);
+			if(d==-1)return o;
+			o=o->ch[d];
+		}
+	}
+	#undef l
+	#undef r
+}
+using namespace Treap;
+
+int main(){
+	insert(root,2);
+	insert(root,3);
+	insert(root,1);
+	cout<<rank(root,3);
+	return 0;
+}
